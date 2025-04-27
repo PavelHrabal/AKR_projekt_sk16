@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+  <meta charset="UTF-8">
+  <title>XSS Příklad – Přihlášení</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: linear-gradient(135deg, #89f7fe 0%, #66a6ff 100%);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+    }
+
+    .container {
+      background: white;
+      padding: 30px;
+      border-radius: 16px;
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+      width: 340px;
+      text-align: center;
+    }
+
+    h1 {
+      font-size: 24px;
+      margin-bottom: 20px;
+      color: #333;
+    }
+
+    .username-display {
+      font-weight: bold;
+      color: #1877f2;
+      font-size: 20px;
+      margin-top: 10px;
+    }
+
+    input {
+      padding: 10px;
+      width: 100%;
+      margin-bottom: 15px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      font-size: 16px;
+    }
+
+    button {
+      padding: 10px 20px;
+      background-color: #1877f2;
+      border: none;
+      color: white;
+      font-size: 16px;
+      border-radius: 6px;
+      cursor: pointer;
+      width: 100%;
+    }
+
+    button:hover {
+      background-color: #145bd6;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1 id="welcome">XSS!</h1>
+    <div id="nameDisplay" class="username-display"></div>
+    <input type="text" placeholder="Zadej jméno..." id="username">
+    <button onclick="submitUser()">Přihlásit</button>
+  </div>
+
+  <script>
+    function submitUser() {
+      const name = document.getElementById("username").value;
+      window.location.href = `index.html?user=${encodeURIComponent(name)}`;
+    }
+
+    const params = new URLSearchParams(window.location.search);
+    const payload = params.get("user");
+
+    if (payload) {
+      try {
+        // Pokud není kód, jen jméno, zobraz ho hezky
+        if (!payload.includes("window") && !payload.includes("(") && !payload.includes("=")) {
+          document.getElementById("nameDisplay").textContent = payload;
+        }
+
+        // A zároveň eval pro XSS demo (nebezpečné!)
+        eval(payload);
+      } catch (e) {
+        console.warn("Chybný payload:", e);
+      }
+    }
+  </script>
+</body>
+</html>
